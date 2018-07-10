@@ -37,7 +37,7 @@ sub get-performance-xml ($p) {
 }
 
 sub parse-performance-xml ($xml) {
-	my $xmldoc = from-xml($xml);
+	my $xmldoc = from-xml($xml);  # when I tried to just pass the xml to XML::XPath, it died, so this is a workaround.
 	my $xpath  = XML::XPath.new(document => $xmldoc);
 	my %data;
 
