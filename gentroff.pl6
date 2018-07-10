@@ -15,9 +15,10 @@ sub MAIN ( Str :p(:$performance)!, Bool :$bcr = False, Bool :$nagcr = False, Boo
 		exit();
 	}
 
-	my $xml    = get-performance-xml($performance);
-	my %parsed = parse-performance-xml($xml);
-	my $output = create-groff(%parsed, :$bcr, :$nagcr);
+	my $xml      = get-performance-xml($performance);
+	my %parsed   = parse-performance-xml($xml);
+	%parsed<pid> = $performance;
+	my $output   = create-groff(%parsed, :$bcr, :$nagcr);
 
 	# save the data
 	$file.IO.spurt: $output;
@@ -37,34 +38,30 @@ sub get-performance-xml ($p) {
 
 sub parse-performance-xml ($xml) {
 	my $xmldoc = from-xml($xml);
-	my $xpath = XML::XPath.new(document => $xmldoc);
+	my $xpath  = XML::XPath.new(document => $xmldoc);
 	my %data;
 
 	# gather the straightforward items
 	my %spec =
-		pid => '/performance/@id',
-		guild => '/performance/association/text()',
-		date => '/performance/date/text()',
-		tower => '/performance/place/@towerbase-id',
-		nchanges => '/performance/title/changes/text()',
-		method => '/performance/title/method/text()',
-		composer => '/performance/composer/text()',
-		details => '/performance/details/text()',
-		notes => '/performance/footnote/text()',
+		guild       => '/performance/association/text()',
+		date        => '/performance/date/text()',
+		tower       => '/performance/place/@towerbase-id',
+		towernamepl => '/performance/place/place-name[@type="place"]/text()',
+		towernamede => '/performance/place/place-name[@type="dedication"]/text()',
+		towernameco => '/performance/place/place-name[@type="county"]/text()',
+		nchanges    => '/performance/title/changes/text()',
+		method      => '/performance/title/method/text()',
+		composer    => '/performance/composer/text()',
+		details     => '/performance/details/text()',
+		notes       => '/performance/footnote/text()',
 	;
 
 	for %spec.kv -> $k, $v {
 		my $r = $xpath.find($v);
 		given $r.WHAT {
-			when XML::Text {
-				%data{$k} = $r.text().trim();
-			}
-			when Str {
-				%data{$k} = $r;
-			}
-			when Array { # for gathering the footnotes
-				%data{$k} = $r.map({ .text().trim(); }).list;
-			}
+			when XML::Text { %data{$k} = $r.text().trim(); }
+			when Str       { %data{$k} = $r; }
+			when Array     { %data{$k} = $r.map({ .text().trim(); }).list; }
 			default {
 				#say $_.perl;
 			}
@@ -79,7 +76,6 @@ sub parse-performance-xml ($xml) {
 	}
 
 	# clean up some things
-	%data<pid> .= substr(1);
 	if !%data<guild> { %data<guild> = 'Boston Change Ringers'; }
 
 	return %data;
@@ -90,48 +86,49 @@ sub create-groff (%perf, Bool :$bcr, Bool :$nagcr) {
 	%rdata<commandline_comment> = "\\# in 'root' dir: groff -Tpdf groff/{ %perf<pid> }.groff > pdf/{ %perf<pid> }.pdf";
 
 	if ($bcr or $nagcr) and ($bcr xor $nagcr) {
-		if $bcr { %rdata<urpic><img> = 'bcr'; }
+		if $bcr   { %rdata<urpic><img> = 'bcr'; }
 		if $nagcr { %rdata<urpic><img> = 'nagcr'; }
 	}
 	elsif $bcr and $nagcr {
-		;
+		# @TODO
 	}
 	else {
 		given %perf<guild> {
-			when 'North American Guild' { %rdata<urpic><img> = 'nagcr'; }
+			when 'North American Guild'     { %rdata<urpic><img> = 'nagcr'; }
 			when 'MIT Guild of Bellringers' { %rdata<urpic><img> = 'bcr'; }
-			when 'Boston Change Ringers' { %rdata<urpic><img> = 'bcr'; }
+			when 'Boston Change Ringers'    { %rdata<urpic><img> = 'bcr'; }
 		}
 	}
 
 	%rdata<guild> = %perf<guild>;
 
-	my $date = Date.new(%perf<date>, formatter => &date-formatter);
-	%rdata<date> = $date;
+	%rdata<date> = Date.new(%perf<date>, formatter => &date-formatter);
 
-	given %perf<tower> {
-		when 5852 { %rdata<tower> = "Christ Church in the City of Boston\n.ftsmall\n\\f[I](called \\[lq]Old North\\[rq])\\f[]\n" }
-		when 5851 { %rdata<tower> = "The Church of the Advent\n" }
-		default { %rdata<tower> = "A tower \@TODO specify\n" }
-	};
+	my $towername = "%perf<towernamede>, %perf<towernamepl>, %perf<towernameco>";
+	if %perf<tower> ~~ (5851|5852) {
+		%rdata<tower>{'t' ~ %perf<tower>}<towername> = $towername;
+	}
+	else {
+		%rdata<tower><tdef><towername> = $towername;
+	}
 
 	given %perf<nchanges> {
-		when $_ < 1200 { %rdata<performance_type> = 'performance' };
+		when         $_ < 1200 { %rdata<performance_type> = 'performance' };
 		when 1200 <= $_ < 5000 { %rdata<performance_type> = 'quarter-peal' };
-		when $_ >= 5000 { %rdata<performance_type> = 'peal' };
-		default { %rdata<performance_type> = 'weird non-number of changes' };
+		when 5000 <= $_        { %rdata<performance_type> = 'peal' };
+		default                { %rdata<performance_type> = 'weird non-number of changes' };
 	};
 
-	%rdata<method> = %perf<nchanges> ~ ' ' ~ %perf<method> ~ "\n";
-	if %perf<composer> { %rdata<method> ~= ".ftsmall\ncomposed by { %perf<composer> }\n"; }
-	if %perf<details> { %rdata<method> ~= ".fi\n.ftsmall\n{ %perf<details> }\n.nf\n"; }
+	%rdata<method><method> = %perf<nchanges> ~ ' ' ~ %perf<method> ~ "\n";
+	if %perf<composer> { %rdata<method><composed><composer> = %perf<composer>; }
+	if %perf<details>  { %rdata<method><details><details> =  %perf<details>; }
 
 	my $num = numbells(%perf<method>);
-	for sort(%perf<ringers>.keys) -> $n {
+	for %perf<ringers>.keys.sort(&infix:«<=>») -> $n {
 		my $l = "\t";
-		if $n eq '1' { $l ~= '\*[treble]'; }
-		elsif $n > $num { $l ~= '\*[tenor]'; }
-		else { $l ~= $n; }
+		if    $n == '1'  { $l ~= '\*[treble]'; }
+		elsif $n >  $num { $l ~= '\*[tenor]'; }
+		else             { $l ~= $n; }
 		$l ~= "\t" ~ %perf<ringers>{$n} ~ "\n";
 		%rdata<ringers> ~= $l;
 	}
@@ -141,7 +138,9 @@ sub create-groff (%perf, Bool :$bcr, Bool :$nagcr) {
 	}
 
 	my $out = Template::Mustache.render($=finish, %rdata);
-	$out ~~ s:g/\n\n/\n/; # clean up blank lines, which are anathema to troff
+	$out ~~ s:g/\n\n/\n/;    # clean up blank lines, which are anathema to troff
+	$out ~~ s:g/\&quot\;/"/;  # xml fixes
+	$out ~~ s:g/\&amp\;/"/;   # xml fixes
 	return $out;
 }
 
@@ -149,17 +148,15 @@ sub date-formatter ($self) {
 	my $year = $self.year;
 	my $month = qw|nul January February March April May June July August September October November December|[$self.month];
 	my $day = $self.day;
-	my $affix = '\*[st]';
-	if 11 <= $day <= 19 { $affix = '\*[th]'; }
-	else {
-		given $day mod 10 {
-			when 0 { $affix = '\*[th]'; }
-			when 1 { $affix = '\*[st]'; }
-			when 2 { $affix = '\*[nd]'; }
-			when 3 { $affix = '\*[rd]'; }
-			when 4 <= $_ <= 9 { $affix = '\*[th]'; }
-		}
-	}
+
+	# see https://stackoverflow.com/a/13627586/1030573
+	my $day_m10  = $day mod 10;
+	my $day_m100 = $day mod 100;
+	my $affix    = '\*[th]';         # default affix
+	if    ($day_m10 == 1) && ($day_m100 != 11) { $affix = '\*[st]'; }
+	elsif ($day_m10 == 2) && ($day_m100 != 12) { $affix = '\*[nd]'; }
+	elsif ($day_m10 == 3) && ($day_m100 != 13) { $affix = '\*[rd]'; }
+
 	return "$month $day$affix, $year";
 }
 
@@ -169,11 +166,11 @@ sub numbells ($method) {
 		fc('Singles') => 3,
 		fc('Minimus') => 4,
 		fc('Doubles') => 5,
-		fc('Minor') => 6,
+		fc('Minor')   => 6,
 		fc('Triples') => 7,
-		fc('Major') => 8,
-		fc('Caters') => 9,
-		fc('Royal') => 10,
+		fc('Major')   => 8,
+		fc('Caters')  => 9,
+		fc('Royal')   => 10,
 		fc('Cinques') => 11,
 		fc('Maximus') => 12,
 	;
@@ -238,26 +235,50 @@ sub numbells ($method) {
 .ds tenor      \s[-3]TENOR\s[+3]
 .ds conductor  \f[I]\s[-1](conductor)\s[+1]\f[]
 .nf
-{{#urpic}}
+{{# urpic}}
 \h[|3.5i]\X'pdf: pdfpic {{{img}}}.pdf -L 1i 1i'
 .sp 0.5v
-{{/urpic}}
+{{/ urpic}}
 .GUILD "{{{ guild }}}"
 .STANZA "on"
 {{{ date }}}
 .STANZA "at"
-{{{ tower }}}
+{{# tower }}
+{{# t5851 }}
+The Church of the Advent
+{{/ t5851 }}
+{{# t5852 }}
+Christ Church in the City of Boston
+.ftsmall
+\f[I](called \[lq]Old North\[rq])\f[]
+{{/ t5852 }}
+{{# tdef }}
+{{{ towername }}}
+{{/ tdef }}
+{{/ tower }}
 .STANZA "was rung a {{{ performance_type }}} of"
+{{# method }}
 {{{ method }}}
+{{# composed }}
+.ftsmall
+composed by {{{ composer }}}
+{{/ composed }}
+{{# details }}
+.fi
+.ftsmall
+{{{ details }}}
+.nf
+{{/ details }}
+{{/ method }}
 .STANZA "by the ringers"
 .in 0
 .ta 1iR 1.2i
 {{{ ringers }}}
 .br
-{{#notes}}
+{{# notes}}
 .STANZA "with notes"
 .fi
 {{{ footnotes }}}
 .nf
-{{/notes}}
+{{/ notes}}
 .finalflourish
