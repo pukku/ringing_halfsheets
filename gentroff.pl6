@@ -93,11 +93,12 @@ sub create-groff (%perf, Bool :$bcr, Bool :$nagcr) {
 		# @TODO
 	}
 	else {
-		given %perf<guild> {
-			when 'North American Guild'     { %rdata<urpic><img> = 'nagcr'; }
-			when 'MIT Guild of Bellringers' { %rdata<urpic><img> = 'bcr'; }
-			when 'Boston Change Ringers'    { %rdata<urpic><img> = 'bcr'; }
-		}
+		my %guild_mapping =
+			'North American Guild' => 'nagcr',
+			'MIT Guild of Bellringers' => 'bcr',
+			'Boston Change Ringers' => 'bcr',
+		;
+		%rdata<urpic><img> = %guild_mapping{%perf<guild>};
 	}
 
 	%rdata<guild> = %perf<guild>;
@@ -112,25 +113,23 @@ sub create-groff (%perf, Bool :$bcr, Bool :$nagcr) {
 		%rdata<tower><tdef><towername> = $towername;
 	}
 
-	given %perf<nchanges> {
-		when         $_ < 1200 { %rdata<performance_type> = 'performance' };
-		when 1200 <= $_ < 5000 { %rdata<performance_type> = 'quarter-peal' };
-		when 5000 <= $_        { %rdata<performance_type> = 'peal' };
-		default                { %rdata<performance_type> = 'weird non-number of changes' };
+	%rdata<performance_type> = do given %perf<nchanges> {
+		when         $_ < 1200 { 'performance' };
+		when 1200 <= $_ < 5000 { 'quarter-peal' };
+		when 5000 <= $_        { 'peal' };
+		default                { 'weird non-number of changes' };
 	};
 
-	%rdata<method><method> = %perf<nchanges> ~ ' ' ~ %perf<method> ~ "\n";
+	%rdata<method><method> = "%perf<nchanges> %perf<method>";
 	if %perf<composer> { %rdata<method><composed><composer> = %perf<composer>; }
 	if %perf<details>  { %rdata<method><details><details> =  %perf<details>; }
 
 	my $num = numbells(%perf<method>);
 	for %perf<ringers>.keys.sort(&infix:«<=>») -> $n {
-		my $l = "\t";
-		if    $n == '1'  { $l ~= '\*[treble]'; }
-		elsif $n >  $num { $l ~= '\*[tenor]'; }
-		else             { $l ~= $n; }
-		$l ~= "\t" ~ %perf<ringers>{$n} ~ "\n";
-		%rdata<ringers> ~= $l;
+		my $rnum = $n;
+		if    $n == '1'  { $rnum = '\*[treble]'; }
+		elsif $n >  $num { $rnum = '\*[tenor]'; }
+		%rdata<ringers> ~= "\t{$rnum}\t{%perf<ringers>{$n}}\n";
 	}
 
 	if %perf<notes>.elems {
@@ -138,9 +137,9 @@ sub create-groff (%perf, Bool :$bcr, Bool :$nagcr) {
 	}
 
 	my $out = Template::Mustache.render($=finish, %rdata);
-	$out ~~ s:g/\n\n/\n/;    # clean up blank lines, which are anathema to troff
-	$out ~~ s:g/\&quot\;/"/;  # xml fixes
-	$out ~~ s:g/\&amp\;/"/;   # xml fixes
+	$out ~~ s:g/\n**2..*/\n/;    # clean up blank lines, which are anathema to troff
+	$out ~~ s:g/'&quot;'/"/;  # xml fixes
+	$out ~~ s:g/'&amp;'/"/;   # xml fixes
 	return $out;
 }
 
