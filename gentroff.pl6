@@ -129,7 +129,7 @@ sub create-groff (%perf, Bool :$bcr, Bool :$nagcr) {
 		my $rnum = $n;
 		if    $n == '1'  { $rnum = '\*[treble]'; }
 		elsif $n >  $num { $rnum = '\*[tenor]'; }
-		%rdata<ringers> ~= "\t{$rnum}\t{%perf<ringers>{$n}}\n";
+		%rdata<ringers>.push: { num => $rnum, ringer => %perf<ringers>{$n} };
 	}
 
 	if %perf<notes>.elems {
@@ -161,7 +161,7 @@ sub date-formatter ($self) {
 
 sub numbells ($method) {
 	my $class = ($method ~~ m/(\w+)$/).Str;
-	my @counts = |nul impossible impossible Singles Minimus Doubles Minor Triples Major Caters Royal Cinques Maximus|.map: &fc;
+	my @counts = qw|nul impossible impossible Singles Minimus Doubles Minor Triples Major Caters Royal Cinques Maximus|.map: &fc;
 	return @counts.first(fc($class), :k) // 16;
 }
 
@@ -261,7 +261,9 @@ composed by {{{ composer }}}
 .STANZA "by the ringers"
 .in 0
 .ta 1iR 1.2i
-{{{ ringers }}}
+{{# ringers }}
+	{{{ num }}}	{{{ ringer }}}
+{{/ ringers }}
 .br
 {{# notes}}
 .STANZA "with notes"
