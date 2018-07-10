@@ -94,9 +94,9 @@ sub create-groff (%perf, Bool :$bcr, Bool :$nagcr) {
 	}
 	else {
 		my %guild_mapping =
-			'North American Guild' => 'nagcr',
+			'North American Guild'     => 'nagcr',
 			'MIT Guild of Bellringers' => 'bcr',
-			'Boston Change Ringers' => 'bcr',
+			'Boston Change Ringers'    => 'bcr',
 		;
 		%rdata<urpic><img> = %guild_mapping{%perf<guild>};
 	}
