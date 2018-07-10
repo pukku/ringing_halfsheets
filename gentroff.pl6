@@ -7,7 +7,9 @@ use XML;
 use XML::XPath;
 use Template::Mustache;
 
-sub MAIN ( Str :p(:$performance)!, Bool :$bcr = False, Bool :$nagcr = False, Bool :g(:$groff) = False, Bool :f(:$force) = False) {
+sub MAIN ( Str :p(:$performance)!, Bool :g(:$groff) = False, Bool :f(:$force) = False,
+           Str :i(:$image)? where ( !$image.defined or ($image eq 'none') or "{$image}.pdf".IO.f or croak("{$image}.pdf does not exist for inclusion as image") )
+) {
 
 	my $file = "groff/$performance.groff";
 	if $file.IO.e and !$force {
@@ -18,7 +20,7 @@ sub MAIN ( Str :p(:$performance)!, Bool :$bcr = False, Bool :$nagcr = False, Boo
 	my $xml      = get-performance-xml($performance);
 	my %parsed   = parse-performance-xml($xml);
 	%parsed<pid> = $performance;
-	my $output   = create-groff(%parsed, :$bcr, :$nagcr);
+	my $output   = create-groff(%parsed, $image);
 
 	# save the data
 	$file.IO.spurt: $output;
@@ -81,16 +83,14 @@ sub parse-performance-xml ($xml) {
 	return %data;
 }
 
-sub create-groff (%perf, Bool :$bcr, Bool :$nagcr) {
+sub create-groff (%perf, $image) {
 	my %rdata;
 	%rdata<commandline_comment> = "\\# in 'root' dir: groff -Tpdf groff/{ %perf<pid> }.groff > pdf/{ %perf<pid> }.pdf";
 
-	if ($bcr or $nagcr) and ($bcr xor $nagcr) {
-		if $bcr   { %rdata<urpic><img> = 'bcr'; }
-		if $nagcr { %rdata<urpic><img> = 'nagcr'; }
-	}
-	elsif $bcr and $nagcr {
-		# @TODO
+	if $image.defined {
+		if $image ne 'none' {
+			%rdata<urpic><img> = $image;
+		}
 	}
 	else {
 		my %guild_mapping =
