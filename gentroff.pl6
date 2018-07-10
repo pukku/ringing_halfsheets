@@ -138,8 +138,8 @@ sub create-groff (%perf, Bool :$bcr, Bool :$nagcr) {
 
 	my $out = Template::Mustache.render($=finish, %rdata);
 	$out ~~ s:g/\n**2..*/\n/;    # clean up blank lines, which are anathema to troff
-	$out ~~ s:g/'&quot;'/"/;  # xml fixes
-	$out ~~ s:g/'&amp;'/"/;   # xml fixes
+	$out ~~ s:g/'&quot;'/"/;     # xml fixes
+	$out ~~ s:g/'&amp;'/"/;      # xml fixes
 	return $out;
 }
 
