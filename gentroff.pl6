@@ -161,19 +161,8 @@ sub date-formatter ($self) {
 
 sub numbells ($method) {
 	my $class = ($method ~~ m/(\w+)$/).Str;
-	my %counts =
-		fc('Singles') => 3,
-		fc('Minimus') => 4,
-		fc('Doubles') => 5,
-		fc('Minor')   => 6,
-		fc('Triples') => 7,
-		fc('Major')   => 8,
-		fc('Caters')  => 9,
-		fc('Royal')   => 10,
-		fc('Cinques') => 11,
-		fc('Maximus') => 12,
-	;
-	return %counts{fc($class)} // 16;
+	my @counts = |nul impossible impossible Singles Minimus Doubles Minor Triples Major Caters Royal Cinques Maximus|.map: &fc;
+	return @counts.first(fc($class), :k) // 16;
 }
 
 =finish
