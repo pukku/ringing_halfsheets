@@ -31,7 +31,7 @@ sub MAIN ( Str :p(:$performance)!, Bool :$bcr = False, Bool :$nagcr = False, Boo
 }
 
 sub get-performance-xml ($p) {
-	my $data = HTTP::UserAgent.new.get("https://bb.ringingworld.co.uk/view.php" ~ "?id={$p}", Accept => 'application/xml');
+	my $data = HTTP::UserAgent.new.get("https://bb.ringingworld.co.uk/view.php?id={$p}", Accept => 'application/xml');
 	$data.is-success or croak("HTTP error retrieving post: {$data.status-line}.");
 	return $data.content;
 }
