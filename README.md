@@ -6,7 +6,7 @@ towers, including special logos and text.
 
 You call it as
 
-		gentroff.pl6 -performance=pid -force -groff -bcr -nagcr
+		gentroff.pl6 -performance=pid -force -groff -image=bcr
 
 The performance id is from BellBoard. (You can also use `-p`)
 
@@ -15,10 +15,11 @@ performance, in case you've customized the `.groff` output
 file. To force it to overwrite the existing file, pass
 `-force` (or `-f`).
 
-If you know which logo you want to include, you can specify it,
-otherwise it tries to guess based on the association
-reported by BellBoard. (`-bcr` and `-nagcr`; right now
-you can only put in one or the other, not both.)
+If you know which logo you want to include, you can pass the
+name of a file (without the `.pdf` extension) to the `-image`
+(`-i`) parameter. If you don't want an image, specify "`none`".
+Otherwise, it tries to guess based on the association
+reported by BellBoard.
 
 The program generates a `.groff` output file, and if you want
 to run the `groff` command line as a part of the program,
