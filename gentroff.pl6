@@ -189,7 +189,7 @@ sub numbells ($method) {
 .de GUILD
 .ps \\n[def_ps]pt
 .vs \\n[def_vs]pt
-.nop \f[I]by the\f[]\h[|0.5i]\f[B]\\$1\f[]
+.nop \f[I]for the\f[]\h[|0.5i]\f[B]\\$1\f[]
 ..
 .de STANZA
 .ps \\n[def_ps]pt
