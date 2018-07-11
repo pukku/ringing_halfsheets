@@ -27,7 +27,7 @@
 .de GUILD                         \" a macro to display the guild
 .  ps \\n[def_ps]pt               \" set font size
 .  vs \\n[def_vs]pt               \" set leading
-.  nop \f[I]by the\f[]\h[|0.5i]\f[B]\\$1\f[]        \" italic font; word "by"; reset font; move to 0.5i from left margin; font bold; first parameter; reset font
+.  nop \f[I]for the\f[]\h[|0.5i]\f[B]\\$1\f[]        \" italic font; word "by"; reset font; move to 0.5i from left margin; font bold; first parameter; reset font
 ..
 .de STANZA                        \" a macro to start a stanza
 .  ps \\n[def_ps]pt               \" set font size
