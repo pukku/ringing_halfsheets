@@ -83,7 +83,7 @@ sub parse-performance-xml ($xml) {
 
 sub create-groff (%perf, $image) {
 	my %rdata;
-	%rdata<commandline_comment> = "\\# in 'root' dir: groff -Tpdf groff/{ %perf<pid> }.groff > pdf/{ %perf<pid> }.pdf";
+	%rdata<pid> = %perf<pid>;
 
 	%rdata<urpic><img> = do given %perf<guild> {
 		when defined($image)            { $image  };
@@ -158,7 +158,7 @@ sub numbells ($method) {
 }
 
 =finish
-{{{ commandline_comment }}}
+\# in 'root' dir: groff -Tpdf groff/{{{pid}}}.groff > pdf/{{{pid}}}.pdf
 \# see demo.groff for comments
 \X'papersize=5.5in,8.5in'
 .pl 8.5i
