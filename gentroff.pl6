@@ -15,9 +15,9 @@ sub MAIN ( Str :p(:$performance)!, Bool :g(:$groff) = False, Bool :f(:$force) = 
 		croak "File $file already exists. Will not overwrite.";
 	}
 
-	my $xml      = get-performance-xml($performance);
-	my %parsed   = parse-performance-xml($xml);
-	my $output   = create-groff(%parsed, $image);
+	my $xml    = get-performance-xml($performance);
+	my %parsed = parse-performance-xml($xml);
+	my $output = create-groff(%parsed, $image);
 
 	if %parsed<pid> ne $performance {
 		croak "Retrieved performance has different id: requested $performance and received %parsed<pid>. Will not continue.";
@@ -44,20 +44,20 @@ sub parse-performance-xml ($xml) {
 	my %data;
 
 	# gather the straightforward items
-	my %spec =
-		pid         => 'substring(/performance/@id,2)',    # the performance ID sadly starts with a 'P' in the XML
-		guild       => '/performance/association/text()',
-		date        => '/performance/date/text()',
-		tower       => '/performance/place/@towerbase-id',
-		towernamepl => '/performance/place/place-name[@type="place"]/text()',
-		towernamede => '/performance/place/place-name[@type="dedication"]/text()',
-		towernameco => '/performance/place/place-name[@type="county"]/text()',
-		nchanges    => '/performance/title/changes/text()',
-		method      => '/performance/title/method/text()',
-		composer    => '/performance/composer/text()',
-		details     => '/performance/details/text()',
-		notes       => '/performance/footnote/text()',
-	;
+	my %spec = (
+		'pid'         => 'substring(/performance/@id,2)',    # the performance ID sadly starts with a 'P' in the XML
+		'guild'       => '/performance/association/text()',
+		'date'        => '/performance/date/text()',
+		'tower'       => '/performance/place/@towerbase-id',
+		'towernamepl' => '/performance/place/place-name[@type="place"]/text()',
+		'towernamede' => '/performance/place/place-name[@type="dedication"]/text()',
+		'towernameco' => '/performance/place/place-name[@type="county"]/text()',
+		'nchanges'    => '/performance/title/changes/text()',
+		'method'      => '/performance/title/method/text()',
+		'composer'    => '/performance/composer/text()',
+		'details'     => '/performance/details/text()',
+		'notes'       => '/performance/footnote/text()',
+	);
 
 	for %spec.kv -> $k, $v {
 		my $r = $xpath.find($v);
@@ -131,7 +131,7 @@ sub create-groff (%perf, $image) {
 
 	my $out = Template::Mustache.render($=finish, %rdata);
 	$out ~~ s:g/ \n ** 2..* /\n/;    # clean up blank lines, which are anathema to troff
-	$out .= trans([ '&lt;', '&gt;', '&amp;', '&quot;' ] => ['<', '>', '&', '"']); # fix XML entities
+	$out .= trans([ '&lt;', '&gt;', '&amp;', '&quot;' ] => [ '<', '>', '&', '"' ]); # fix XML entities
 	return $out;
 }
 
