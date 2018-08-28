@@ -70,7 +70,7 @@
 .nf                               \" do not fill
 .
 \# the image is optionally (but preferably) included
-\h[|3.5i]\X'pdf: pdfpic bcr.pdf -L 1i 1i'       \" move 3.5in in from left margin, and then the special groff way of including a pdf file (image)
+\h[|3.0i]\X'pdf: pdfpic bcr.pdf -L 1.5i 1.5i'       \" move 3in in from left margin, and then the special groff way of including a pdf file (image)
 .sp 0.5v                          \" move down half a line
 .
 \# display the guild

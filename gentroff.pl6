@@ -216,7 +216,7 @@ sub numbells ($method) {
 .ds conductor  \f[I]\s[-1](conductor)\s[+1]\f[]
 .nf
 {{# urpic}}
-\h[|3.5i]\X'pdf: pdfpic {{{img}}}.pdf -L 1i 1i'
+\h[|3.0i]\X'pdf: pdfpic {{{img}}}.pdf -L 1.5i 1.5i'
 .sp 0.5v
 {{/ urpic}}
 {{# guild}}
