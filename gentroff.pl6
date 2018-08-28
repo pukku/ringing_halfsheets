@@ -3,7 +3,6 @@ use v6;
 sub croak { note $^msg; exit(1); } # because Perl 6 doesn't have the Perl 5 "\n" magic for die
 
 use HTTP::UserAgent;
-use XML;
 use XML::XPath;
 use Template::Mustache;
 
@@ -13,14 +12,16 @@ sub MAIN ( Str :p(:$performance)!, Bool :g(:$groff) = False, Bool :f(:$force) = 
 
 	my $file = "groff/$performance.groff";
 	if $file.IO.e and !$force {
-		say "File $file already exists. Will not overwrite.";
-		exit();
+		croak "File $file already exists. Will not overwrite.";
 	}
 
 	my $xml      = get-performance-xml($performance);
 	my %parsed   = parse-performance-xml($xml);
-	%parsed<pid> = $performance;
 	my $output   = create-groff(%parsed, $image);
+
+	if %parsed<pid> ne $performance {
+		croak "Retrieved performance has different id: requested $performance and received %parsed<pid>. Will not continue.";
+	}
 
 	# save the data
 	$file.IO.spurt: $output;
@@ -28,7 +29,7 @@ sub MAIN ( Str :p(:$performance)!, Bool :g(:$groff) = False, Bool :f(:$force) = 
 
 	if $groff {
 		shell "/usr/local/bin/groff -Tpdf $file > pdf/$performance.pdf";
-		say "groff command run";
+		say "groff command run.";
 	}
 }
 
@@ -39,12 +40,12 @@ sub get-performance-xml ($p) {
 }
 
 sub parse-performance-xml ($xml) {
-	my $xmldoc = from-xml($xml);  # when I tried to just pass the xml to XML::XPath, it died, so this is a workaround.
-	my $xpath  = XML::XPath.new(document => $xmldoc);
+	my $xpath = XML::XPath.new(xml => $xml);
 	my %data;
 
 	# gather the straightforward items
 	my %spec =
+		pid         => 'substring(/performance/@id,2)',    # the performance ID sadly starts with a 'P' in the XML
 		guild       => '/performance/association/text()',
 		date        => '/performance/date/text()',
 		tower       => '/performance/place/@towerbase-id',
@@ -77,9 +78,6 @@ sub parse-performance-xml ($xml) {
 		%data<ringers>{$r.attribs<bell>} = $ringer;
 	}
 
-	# clean up some things
-	if !%data<guild> { %data<guild> = 'Boston Change Ringers'; }
-
 	return %data;
 }
 
@@ -87,21 +85,16 @@ sub create-groff (%perf, $image) {
 	my %rdata;
 	%rdata<commandline_comment> = "\\# in 'root' dir: groff -Tpdf groff/{ %perf<pid> }.groff > pdf/{ %perf<pid> }.pdf";
 
-	if $image.defined {
-		if $image ne 'none' {
-			%rdata<urpic><img> = $image;
-		}
-	}
-	else {
-		my %guild_mapping =
-			'North American Guild'     => 'nagcr',
-			'MIT Guild of Bellringers' => 'bcr',
-			'Boston Change Ringers'    => 'bcr',
-		;
-		%rdata<urpic><img> = %guild_mapping{%perf<guild>};
-	}
+	%rdata<urpic><img> = do given %perf<guild> {
+		when defined($image)            { $image  };
+		when 'North American Guild'     { 'nagcr' };
+		when 'MIT Guild of Bellringers' { 'bcr'   };
+		when 'Boston Change Ringers'    { 'bcr'   };
+		default                         { 'none'  };
+	};
+	if (%rdata<urpic><img> eq 'none') { %rdata<urpic> = Nil; }
 
-	%rdata<guild> = %perf<guild>;
+	defined(%perf<guild>) and %rdata<guild><guild> = %perf<guild>;
 
 	%rdata<date> = Date.new(%perf<date>, formatter => &date-formatter);
 
@@ -133,13 +126,12 @@ sub create-groff (%perf, $image) {
 	}
 
 	if %perf<notes>.elems {
-		%rdata<notes><footnotes> = %perf<notes>.map({ $_ ~ "\n.sp 0.25\n"}).join();
+		%rdata<notes><footnotes> = [ %perf<notes>.map({ %( 'note' => $_ ); }) ];
 	}
 
 	my $out = Template::Mustache.render($=finish, %rdata);
-	$out ~~ s:g/\n**2..*/\n/;    # clean up blank lines, which are anathema to troff
-	$out ~~ s:g/'&quot;'/"/;     # xml fixes
-	$out ~~ s:g/'&amp;'/"/;      # xml fixes
+	$out ~~ s:g/ \n ** 2..* /\n/;    # clean up blank lines, which are anathema to troff
+	$out .= trans([ '&lt;', '&gt;', '&amp;', '&quot;' ] => ['<', '>', '&', '"']); # fix XML entities
 	return $out;
 }
 
@@ -227,7 +219,9 @@ sub numbells ($method) {
 \h[|3.5i]\X'pdf: pdfpic {{{img}}}.pdf -L 1i 1i'
 .sp 0.5v
 {{/ urpic}}
+{{# guild}}
 .GUILD "{{{ guild }}}"
+{{/ guild}}
 .STANZA "on"
 {{{ date }}}
 .STANZA "at"
@@ -268,7 +262,10 @@ composed by {{{ composer }}}
 {{# notes}}
 .STANZA "with notes"
 .fi
-{{{ footnotes }}}
+{{# footnotes }}
+{{{ note }}}
+.sp 0.25
+{{/ footnotes }}
 .nf
 {{/ notes}}
 .finalflourish
