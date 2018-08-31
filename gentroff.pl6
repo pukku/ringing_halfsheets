@@ -107,8 +107,8 @@ sub create-groff (%perf, $image) {
 	}
 
 	%rdata<performance_type> = do given %perf<nchanges> {
-		when         $_ < 1200 { 'performance' };
-		when 1200 <= $_ < 5000 { 'quarter-peal' };
+		when         $_ < 1250 { 'performance' };
+		when 1250 <= $_ < 5000 { 'quarter-peal' };
 		when 5000 <= $_        { 'peal' };
 		default                { 'weird non-number of changes' };
 	};
