@@ -6,8 +6,10 @@ use HTTP::UserAgent;
 use XML::XPath;
 use Template::Mustache;
 
-sub MAIN ( Str :p(:$performance)!, Bool :g(:$groff) = False, Bool :f(:$force) = False,
-           Str :i(:$image)? where ( !$image.defined or ($image eq 'none') or "{$image}.pdf".IO.f or croak("{$image}.pdf does not exist for inclusion as image") )
+sub MAIN ( Str  :p(:$performance)!,
+           Bool :g(:$groff) = False,
+           Bool :f(:$force) = False,
+           Str  :i(:$image)? where ( !$image.defined or ($image eq 'none') or "{$image}.pdf".IO.f or croak("{$image}.pdf does not exist for inclusion as image") )
 ) {
 
 	my $file = "groff/$performance.groff";
@@ -73,7 +75,7 @@ sub parse-performance-xml ($xml) {
 
 	# gather the ringers
 	for | $xpath.find('/performance/ringers/ringer') -> $r {
-		my $ringer = $r.contents().map( {.text().trim();}).join(" ");
+		my $ringer = $r.contents().map( {.text().trim();}).join(' ');
 		if $r.attribs<conductor> { $ringer ~= ' \*[conductor]'; }
 		%data<ringers>{$r.attribs<bell>} = $ringer;
 	}
@@ -94,7 +96,7 @@ sub create-groff (%perf, $image) {
 	};
 	if (%rdata<urpic><img> eq 'none') { %rdata<urpic> = Nil; }
 
-	defined(%perf<guild>) and %rdata<guild><guild> = %perf<guild>;
+	if %perf<guild> { %rdata<guild><guild> = %perf<guild>; }
 
 	%rdata<date> = Date.new(%perf<date>, formatter => &date-formatter);
 
@@ -137,7 +139,7 @@ sub create-groff (%perf, $image) {
 
 sub date-formatter ($self) {
 	my $year = $self.year;
-	my $month = qw|nul January February March April May June July August September October November December|[$self.month];
+	my $month = qw<nul January February March April May June July August September October November December>[$self.month];
 	my $day = $self.day;
 
 	# see https://stackoverflow.com/a/13627586/1030573
@@ -153,12 +155,12 @@ sub date-formatter ($self) {
 
 sub numbells ($method) {
 	my $class = ($method ~~ m/(\w+)$/).Str;
-	my @counts = qw|nul impossible impossible Singles Minimus Doubles Minor Triples Major Caters Royal Cinques Maximus|.map: &fc;
+	my @counts = qw<nul impossible impossible Singles Minimus Doubles Minor Triples Major Caters Royal Cinques Maximus>.map: &fc;
 	return @counts.first(fc($class), :k) // 16;
 }
 
 =finish
-\# in 'root' dir: groff -Tpdf groff/{{{pid}}}.groff > pdf/{{{pid}}}.pdf
+\# in 'root' dir: groff -Tpdf groff/{{& pid}}.groff > pdf/{{& pid }}.pdf
 \# see demo.groff for comments
 \X'papersize=5.5in,8.5in'
 .pl 8.5i
@@ -216,14 +218,14 @@ sub numbells ($method) {
 .ds conductor  \f[I]\s[-1](conductor)\s[+1]\f[]
 .nf
 {{# urpic}}
-\h[|3.0i]\X'pdf: pdfpic {{{img}}}.pdf -L 1.5i 1.5i'
+\h[|3.0i]\X'pdf: pdfpic {{& img }}.pdf -L 1.5i 1.5i'
 .sp 0.5v
 {{/ urpic}}
 {{# guild}}
-.GUILD "{{{ guild }}}"
+.GUILD "{{& guild }}"
 {{/ guild}}
 .STANZA "on"
-{{{ date }}}
+{{& date }}
 .STANZA "at"
 {{# tower }}
 {{# t5851 }}
@@ -235,20 +237,20 @@ Christ Church in the City of Boston
 \f[I](called \[lq]Old North\[rq])\f[]
 {{/ t5852 }}
 {{# tdef }}
-{{{ towername }}}
+{{& towername }}
 {{/ tdef }}
 {{/ tower }}
-.STANZA "was rung a {{{ performance_type }}} of"
+.STANZA "was rung a {{& performance_type }} of"
 {{# method }}
-{{{ method }}}
+{{& method }}
 {{# composed }}
 .ftsmall
-composed by {{{ composer }}}
+composed by {{& composer }}
 {{/ composed }}
 {{# details }}
 .fi
 .ftsmall
-{{{ details }}}
+{{& details }}
 .nf
 {{/ details }}
 {{/ method }}
@@ -256,14 +258,14 @@ composed by {{{ composer }}}
 .in 0
 .ta 1iR 1.2i
 {{# ringers }}
-	{{{ num }}}	{{{ ringer }}}
+	{{& num }}	{{& ringer }}
 {{/ ringers }}
 .br
 {{# notes}}
 .STANZA "with notes"
 .fi
 {{# footnotes }}
-{{{ note }}}
+{{& note }}
 .sp 0.25
 {{/ footnotes }}
 .nf
