@@ -129,7 +129,7 @@ sub create-groff (%perf, $image) {
 		%rdata<notes><footnotes> = [ %perf<notes>.map({ %( 'note' => $_ ); }) ];
 	}
 
-	my $out = Template::Mustache.render($=finish, %rdata);
+	my $out = Template::Mustache.render($=finish, %rdata, :literal);
 	$out ~~ s:g/ \n ** 2..* /\n/;    # clean up blank lines, which are anathema to troff
 	$out .= trans([ '&lt;', '&gt;', '&amp;', '&quot;' ] => [ '<', '>', '&', '"' ]); # fix XML entities
 	return $out;
