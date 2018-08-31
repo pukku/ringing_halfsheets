@@ -67,9 +67,7 @@ sub parse-performance-xml ($xml) {
 			when XML::Text { %data{$k} = $r.text().trim(); }
 			when Str       { %data{$k} = $r; }
 			when Array     { %data{$k} = $r.map({ .text().trim(); }).list; }
-			default {
-				#say $_.perl;
-			}
+			default        { if defined($r) { croak("Unknown type {$_.perl} for key $k"); } }
 		}
 	}
 
