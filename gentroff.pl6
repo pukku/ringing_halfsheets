@@ -30,7 +30,7 @@ sub MAIN ( Str  :p(:$performance)!,
 	say "$file written.";
 
 	if $groff {
-		shell "/usr/local/bin/groff -Tpdf $file > pdf/$performance.pdf";
+		shell "/usr/local/bin/groff -Tpdf -Kutf8 $file > pdf/$performance.pdf";
 		say "groff command run.";
 	}
 }
@@ -158,7 +158,7 @@ sub numbells ($method) {
 }
 
 =finish
-\# in 'root' dir: groff -Tpdf groff/{{& pid}}.groff > pdf/{{& pid }}.pdf
+\# in 'root' dir: groff -Tpdf -Kutf8 groff/{{& pid}}.groff > pdf/{{& pid }}.pdf
 \# see demo.groff for comments
 \X'papersize=5.5in,8.5in'
 .pl 8.5i
