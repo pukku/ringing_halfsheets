@@ -117,12 +117,13 @@ sub create-groff (%perf, $image) {
 	if %perf<composer> { %rdata<method><composed><composer> = %perf<composer>; }
 	if %perf<details>  { %rdata<method><details><details> =  %perf<details>; }
 
-	my $num = numbells(%perf<method>);
 	for %perf<ringers>.keys.sort(&infix:«<=>») -> $n {
-		my $rnum = $n;
-		if    $n == '1'  { $rnum = '\*[treble]'; }
-		elsif $n >  $num { $rnum = '\*[tenor]'; }
-		%rdata<ringers>.push: { num => $rnum, ringer => %perf<ringers>{$n} };
+		%rdata<ringers>.push: { num => $n, ringer => %perf<ringers>{$n} };
+	}
+	%rdata<ringers>[0]<num> = '\*[treble]';
+	my $num = numbells(%perf<method>);
+	if ($num % 2 == 0) || (%rdata<ringers>.elems >= $num) {
+		%rdata<ringers>[* - 1]<num> = '\*[tenor]';
 	}
 
 	if %perf<notes>.elems {
