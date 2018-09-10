@@ -1,4 +1,4 @@
-\# to view this: in the "root" directory: `groff -Tpdf demo.groff > demo.pdf`
+\# to view this: in the "root" directory: `groff -Tpdf -Kutf8 demo.groff > demo.pdf`
 \# set up the page
 \X'papersize=5.5in,8.5in'         \" pass the paper size through to the pdf driver
 .pl 8.5i                          \" tell groff about the page length
