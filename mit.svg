@@ -1,0 +1,145 @@
+<?xml version="1.0" ?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"
+	id="on-logo" viewBox="-150 -50 300 300">
+	<title>MIT Guild of Bellringers</title>
+
+	<g id="bell"  transform="matrix(1,0,0,-1,0,0) translate(0,-185)">
+		<path d="
+			M 0,0
+			L 120,0
+			C 125,10 130,20 120,30
+			C 130,20 100,50 90,60
+			C 55,110 65,150 65,175
+			C 65,190 30,200 0,200
+			C -30,200 -65,190 -65,175
+			C -65,150 -55,110 -90,60
+			C -100,50 -130,20 -120,30
+			C -130,20 -125,10 -120,0
+			L 0,0
+		" />
+		<circle cx="0" cy="80" r="100" stroke="black" fill="none" />
+	</g>
+	<g id="old-north" transform="matrix(1,0,0,-1,0,0) translate(0,-185) scale(0.2,0.2)" style="stroke: black; stroke-width: 1; fill: white;">
+		<!-- church building behind tower + window cutouts; note path cutout to let tower cutouts work -->
+		<path d="
+			M 0,310 l -155,-113 h 25 v -180 h 130 h 130 v 180 h 25 l -155,113 Z
+			M 0,260 h 40 v -243 h -80 v 243 h 40 Z
+			M -95,120 v 35 a 12,12 0 0 0 27,0 v -35 h -27 Z
+			M 70,120 v 35 a 12,12 0 0 0 27,0 v -35 h -27 Z
+			M -95,45 v 35 a 12,12 0 0 0 27,0 v -35 h -27 Z
+			M 70,45 v 35 a 12,12 0 0 0 27,0 v -35 h -27 Z
+		" />
+		<circle cx="0" cy="985" r="5" />
+		<line x1="0" x2="0" y1="980" y2="965" stroke-width="4" stroke="white" />
+		<!-- weather-vane -->
+		<path d="
+			M 0,965
+			h -5 l -10,-5 l 10,-5 h 5 l 20,0 l -15,5 l 15,5 l -20,0 Z
+		" />
+		<line x1="0" x2="0" y1="955" y2="930" stroke-width="4" stroke="white" />
+		<circle cx="0" cy="925" r="7" />
+		<!-- steeple -->
+		<path d="
+			M 0,918
+			l -20,-273 h 40 l -20,273 Z
+		" />
+		<!-- left decoration -->
+		<path d="
+			M -20,645
+			l 0,16 l -3,0 l 3,10 l -4,10 l -4,-10 l 3,-10 l -3,0 l 0,-16 Z
+		" />
+		<!-- right decoration -->
+		<path d="
+			M 20,645
+			l 0,16 l 3,0 l -3,10 l 4,10 l 4,-10 l -3,-10 l 3,0 l 0,-16 Z
+		" />
+		<!-- interstitial -->
+		<path d="
+			M 0,645
+			l -33,0 l 10,-5 l 0,-7 l -7,0 l 7,-5 l 23,0
+			l 23,0 l 7,5 l -7,0 l 0,7 l 10,5 l -33,0 Z
+		" />
+		<!-- top viewing chamber and window cutout -->
+		<path d="
+			M 0,628 h -23 v -55 h 46 v 55 h -23 Z
+			M 0,580 h -12 v 27 a 12,12 0 0 0 24,0 v -27 h -12 Z
+		" />
+		<!-- interstitial -->
+		<path d="
+			M 0,573
+			h -23 l -25,-10 l 5,-5 h 20 h 23 h 23 h 20 l 5,5 l -25,10 h -23 Z
+		" />
+		<!-- left decoration -->
+		<path d="
+			M -35,568
+			l 3,10 l -4,30 a 3,3 0 1 1 -2,0 l -4,-30 l 3,-12 Z
+		" />
+		<!-- right decoration -->
+		<path d="
+			M 35,568
+			l -3,10 l 4,30 a -3,3 0 1 0 2,0 l 4,-30 l -3,-12 Z
+		" />
+		<!-- middle chamber + window cutouts -->
+		<path d="
+			M 0,558 h -40 v -150 h 40 h 40 v 150 h -40 Z
+			M -20,475 h -10 v 50 a 10,10 0 0 0 20,0 v -50 h -10 Z
+			M 20,475 h -10 v 50 a 10,10 0 0 0 20,0 v -50 h -10 Z
+		" />
+		<!-- left decoration; lines create cross -->
+		<path d="
+			M -40,408
+			v 25 h -5 l -4,70 a 4,4 0 1 1 -2,0 l -4,-70 h -5 v -25 h 20 Z
+		" />
+		<line x1="-55" x2="-45" y1="518" y2="518" stroke-width="2" stroke="white" />
+		<line x1="-50" x2="-50" y1="510" y2="524" stroke-width="2" stroke="white" />
+		<!-- right decoration; lines create cross -->
+		<path d="
+			M 40,408
+			v 25 h 5 l 4,70 a 4,4 0 1 0 2,0 l 4,-70 h 5 v -25 h -20 Z
+		" />
+		<line x1="45" x2="55" y1="518" y2="518" stroke-width="2" stroke="white" />
+		<line x1="50" x2="50" y1="510" y2="524" stroke-width="2" stroke="white" />
+		<!-- interstitial -->
+		<path d="M 0,408 h -60 l -8,-2 l 8,-5 h 60 h 60 l 8,5 l -8,2 h -60 Z" />
+		<!-- body of tower, plus cutouts -->
+		<path d="
+			M 0,401
+			h -60
+			v -100
+			h -3 v -5 h 3
+			v -115
+			h -3 v -5 h 3
+			v -85
+			h -3 v -5 h 3
+			v -70
+			h 120
+			v 70
+			h 3 v 5 h -3
+			v 85
+			h 3 v 5 h -3
+			v 115
+			h 3 v 5 h -3
+			v 100
+			h -60 Z
+
+			M 0,325
+			h -15 v 45 a 15,15 0 0 0 30,0 v -45 h -15 Z
+
+			M 0,220
+			h -25 v 30 h 50 v -30 h -25 Z
+			M 0,225
+			h -20 v 20 h 40 v -20 h -20 Z
+
+			M 0,100
+			h -18 v 55 a 18,18 0 0 0 36,0 v -55 h -18 Z
+
+			M 0,17
+			h -15 v 45 a 15,15 0 0 0 30,0 v -45 h -15 Z
+		" />
+	</g>
+	<g id="text">
+		<rect x="-100" y="185" width="200" height="30" stroke="none" fill="white" />
+		<text x="0" y="190" style="text-anchor: middle; dominant-baseline: hanging; font-size: 16pt;">MIT Guild of Bellringers</text>
+	</g>
+</svg>

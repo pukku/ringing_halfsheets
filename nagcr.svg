@@ -1,0 +1,104 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+	width="1.5in" height="1.5in"
+	preserveAspectRatio="xMidYMid meet"
+	viewBox="-250 -250 500 500"
+	stroke-width="0"
+>
+
+	<!-- background circle -->
+	<g id="background-circle-g">
+	   <circle id="background-circle" fill-opacity="0.0" stroke="black" stroke-width="5" cx="0" cy="0" r="220" />
+	</g>
+
+	<!-- background lines -->
+	<g id="background-lines-g">
+		<rect x="-250" y="18" rx="10" ry="5" width="500" height="10" />
+		<rect x="-250" y="31" rx="5" ry="2.5" width="500" height="5" />
+	</g>
+
+	<!-- tower bell -->
+	<g id="tower-bell-and-headstock-g">
+		<g id="headstock-g">
+			<rect x="-145" y="18" width="290" height="168" />
+			<rect x="-120" y="-42" width="240" height="120" rx="55" ry="60" fill="white" />
+		</g>
+		<g id="tower-bell-g">
+			<!-- The first path creates the sound-bow part of the bell.
+				 The second creates the mouth part.
+			-->
+			<path id="tower-bell" d="
+				M 0,60
+				L 78,60
+				C 85,60 100,45 104,30
+				C 107,0 108,-50 135,-104
+				L -135,-104
+				C -108,-50, -107,0 -104,30
+				C -100,45 -85,60 -78,60
+				L 0,60
+				Z
+
+				M 0,-119
+				L 138,-119
+				C 160,-166, 173,-150 177,-177
+				L -177,-177
+				C -173,-150 -160,-166 -138,-119
+				L 0,-119
+				Z
+
+			" />
+		</g>
+	</g>
+
+	<!-- handbell -->
+	<g id="handbell-g" fill="white" stroke="black" stroke-width="2">
+		<g id="handbell-handle-g">
+			<path id="handbell-handle" d="
+				M 0,-23
+				L 17,-23
+				L 10,-42
+				L 33,-225
+				A 12,15 0 0,0 22,-240
+				L -22,-240
+				A 12,15 0 0,0 -33,-225
+				L -10,-42
+				L -17,-23
+				L 0,-23
+				Z
+
+				M 0,-42
+				L 4,-42
+				L 4,-55
+				L 15,-220
+				A 10,10 0 0,0 5,-227
+				L -5,-227
+				A 10,10 0 0,0 -15,-220
+				L -4,-55
+				L -4,-42
+				L 0,-42
+				Z
+			" fill-rule="evenodd" />
+			<circle cx="14" cy="-25" r="2" stroke-width="0" />
+			<circle cx="-14" cy="-25" r="2" stroke-width="0" />
+		</g>
+
+		<path id="handbell-bell" d="
+			M 0,-20
+			L 10,-20
+			C 13,-13 30,-17 36,-4
+			C 40,75 65,90 72,108
+			L -72,108
+			C -65,90 -40,75 -36,-4
+			C -30,-17 -13,-13 -10,-20
+			L 0,-20
+			Z
+		"/>
+
+		<g id="handbell-clapper-g" stroke-width="0">
+			<rect x="-2" y="115" width="4" height="40" rx="2" ry="5" />
+			<circle cx="0" cy="135" r="7" />
+		</g>
+
+	</g>
+</svg>
