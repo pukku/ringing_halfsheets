@@ -1,4 +1,4 @@
-\# to view this: in the "root" directory: `groff -Tpdf demo.groff > demo.pdf`
+\# to view this: in the "root" directory: `groff -Tpdf -Kutf8 commented.groff > commented.pdf`
 \# set up the page
 \X'papersize=5.5in,8.5in'         \" pass the paper size through to the pdf driver
 .pl 8.5i                          \" tell groff about the page length
@@ -27,7 +27,7 @@
 .de GUILD                         \" a macro to display the guild
 .  ps \\n[def_ps]pt               \" set font size
 .  vs \\n[def_vs]pt               \" set leading
-.  nop \f[I]by the\f[]\h[|0.5i]\f[B]\\$1\f[]        \" italic font; word "by"; reset font; move to 0.5i from left margin; font bold; first parameter; reset font
+.  nop \f[I]for the\f[]\h[|0.5i]\f[B]\\$1\f[]        \" italic font; words "for the"; reset font; move to 0.5i from left margin; font bold; first parameter; reset font
 ..
 .de STANZA                        \" a macro to start a stanza
 .  ps \\n[def_ps]pt               \" set font size
@@ -70,7 +70,7 @@
 .nf                               \" do not fill
 .
 \# the image is optionally (but preferably) included
-\h[|3.5i]\X'pdf: pdfpic bcr.pdf -L 1i 1i'       \" move 3.5in in from left margin, and then the special groff way of including a pdf file (image)
+\h[|3.0i]\X'pdf: pdfpic bcr.pdf -L 1.5i 1.5i'       \" move 3in in from left margin, and then the special groff way of including a pdf file (image)
 .sp 0.5v                          \" move down half a line
 .
 \# display the guild

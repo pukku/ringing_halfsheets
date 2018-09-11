@@ -3,32 +3,35 @@ use v6;
 sub croak { note $^msg; exit(1); } # because Perl 6 doesn't have the Perl 5 "\n" magic for die
 
 use HTTP::UserAgent;
-use XML;
 use XML::XPath;
 use Template::Mustache;
 
-sub MAIN ( Str :p(:$performance)!, Bool :g(:$groff) = False, Bool :f(:$force) = False,
-           Str :i(:$image)? where ( !$image.defined or ($image eq 'none') or "{$image}.pdf".IO.f or croak("{$image}.pdf does not exist for inclusion as image") )
+sub MAIN ( Str  :p(:$performance)!,
+           Bool :g(:$groff) = False,
+           Bool :f(:$force) = False,
+           Str  :i(:$image)? where ( !$image.defined or ($image eq 'none') or "{$image}.pdf".IO.f or croak("{$image}.pdf does not exist for inclusion as image") )
 ) {
 
 	my $file = "groff/$performance.groff";
 	if $file.IO.e and !$force {
-		say "File $file already exists. Will not overwrite.";
-		exit();
+		croak "File $file already exists. Will not overwrite.";
 	}
 
-	my $xml      = get-performance-xml($performance);
-	my %parsed   = parse-performance-xml($xml);
-	%parsed<pid> = $performance;
-	my $output   = create-groff(%parsed, $image);
+	my $xml    = get-performance-xml($performance);
+	my %parsed = parse-performance-xml($xml);
+	my $output = create-groff(%parsed, $image);
+
+	if %parsed<pid> ne $performance {
+		croak "Retrieved performance has different id: requested $performance and received %parsed<pid>. Will not continue.";
+	}
 
 	# save the data
 	$file.IO.spurt: $output;
 	say "$file written.";
 
 	if $groff {
-		shell "/usr/local/bin/groff -Tpdf $file > pdf/$performance.pdf";
-		say "groff command run";
+		shell "/usr/local/bin/groff -Tpdf -Kutf8 $file > pdf/$performance.pdf";
+		say "groff command run.";
 	}
 }
 
@@ -39,24 +42,24 @@ sub get-performance-xml ($p) {
 }
 
 sub parse-performance-xml ($xml) {
-	my $xmldoc = from-xml($xml);  # when I tried to just pass the xml to XML::XPath, it died, so this is a workaround.
-	my $xpath  = XML::XPath.new(document => $xmldoc);
+	my $xpath = XML::XPath.new(xml => $xml);
 	my %data;
 
 	# gather the straightforward items
-	my %spec =
-		guild       => '/performance/association/text()',
-		date        => '/performance/date/text()',
-		tower       => '/performance/place/@towerbase-id',
-		towernamepl => '/performance/place/place-name[@type="place"]/text()',
-		towernamede => '/performance/place/place-name[@type="dedication"]/text()',
-		towernameco => '/performance/place/place-name[@type="county"]/text()',
-		nchanges    => '/performance/title/changes/text()',
-		method      => '/performance/title/method/text()',
-		composer    => '/performance/composer/text()',
-		details     => '/performance/details/text()',
-		notes       => '/performance/footnote/text()',
-	;
+	my %spec = (
+		'pid'         => 'substring(/performance/@id,2)',    # the performance ID sadly starts with a 'P' in the XML
+		'guild'       => '/performance/association/text()',
+		'date'        => '/performance/date/text()',
+		'tower'       => '/performance/place/@towerbase-id',
+		'towernamepl' => '/performance/place/place-name[@type="place"]/text()',
+		'towernamede' => '/performance/place/place-name[@type="dedication"]/text()',
+		'towernameco' => '/performance/place/place-name[@type="county"]/text()',
+		'nchanges'    => '/performance/title/changes/text()',
+		'method'      => '/performance/title/method/text()',
+		'composer'    => '/performance/composer/text()',
+		'details'     => '/performance/details/text()',
+		'notes'       => '/performance/footnote/text()',
+	);
 
 	for %spec.kv -> $k, $v {
 		my $r = $xpath.find($v);
@@ -64,44 +67,34 @@ sub parse-performance-xml ($xml) {
 			when XML::Text { %data{$k} = $r.text().trim(); }
 			when Str       { %data{$k} = $r; }
 			when Array     { %data{$k} = $r.map({ .text().trim(); }).list; }
-			default {
-				#say $_.perl;
-			}
+			default        { if defined($r) { croak("Unknown type {$_.perl} for key $k"); } }
 		}
 	}
 
 	# gather the ringers
 	for | $xpath.find('/performance/ringers/ringer') -> $r {
-		my $ringer = $r.contents().map( {.text().trim();}).join(" ");
+		my $ringer = $r.contents().map( {.text().trim();}).join(' ');
 		if $r.attribs<conductor> { $ringer ~= ' \*[conductor]'; }
 		%data<ringers>{$r.attribs<bell>} = $ringer;
 	}
-
-	# clean up some things
-	if !%data<guild> { %data<guild> = 'Boston Change Ringers'; }
 
 	return %data;
 }
 
 sub create-groff (%perf, $image) {
 	my %rdata;
-	%rdata<commandline_comment> = "\\# in 'root' dir: groff -Tpdf groff/{ %perf<pid> }.groff > pdf/{ %perf<pid> }.pdf";
+	%rdata<pid> = %perf<pid>;
 
-	if $image.defined {
-		if $image ne 'none' {
-			%rdata<urpic><img> = $image;
-		}
-	}
-	else {
-		my %guild_mapping =
-			'North American Guild'     => 'nagcr',
-			'MIT Guild of Bellringers' => 'bcr',
-			'Boston Change Ringers'    => 'bcr',
-		;
-		%rdata<urpic><img> = %guild_mapping{%perf<guild>};
-	}
+	%rdata<urpic><img> = do given %perf<guild> {
+		when defined($image)            { $image  };
+		when 'North American Guild'     { 'nagcr' };
+		when 'MIT Guild of Bellringers' { 'bcr'   };
+		when 'Boston Change Ringers'    { 'bcr'   };
+		default                         { 'none'  };
+	};
+	if (%rdata<urpic><img> eq 'none') { %rdata<urpic> = Nil; }
 
-	%rdata<guild> = %perf<guild>;
+	if %perf<guild> { %rdata<guild><guild> = %perf<guild>; }
 
 	%rdata<date> = Date.new(%perf<date>, formatter => &date-formatter);
 
@@ -114,8 +107,8 @@ sub create-groff (%perf, $image) {
 	}
 
 	%rdata<performance_type> = do given %perf<nchanges> {
-		when         $_ < 1200 { 'performance' };
-		when 1200 <= $_ < 5000 { 'quarter-peal' };
+		when         $_ < 1250 { 'performance' };
+		when 1250 <= $_ < 5000 { 'quarter-peal' };
 		when 5000 <= $_        { 'peal' };
 		default                { 'weird non-number of changes' };
 	};
@@ -124,28 +117,28 @@ sub create-groff (%perf, $image) {
 	if %perf<composer> { %rdata<method><composed><composer> = %perf<composer>; }
 	if %perf<details>  { %rdata<method><details><details> =  %perf<details>; }
 
-	my $num = numbells(%perf<method>);
 	for %perf<ringers>.keys.sort(&infix:«<=>») -> $n {
-		my $rnum = $n;
-		if    $n == '1'  { $rnum = '\*[treble]'; }
-		elsif $n >  $num { $rnum = '\*[tenor]'; }
-		%rdata<ringers>.push: { num => $rnum, ringer => %perf<ringers>{$n} };
+		%rdata<ringers>.push: { num => $n, ringer => %perf<ringers>{$n} };
+	}
+	%rdata<ringers>[0]<num> = '\*[treble]';
+	my $num = numbells(%perf<method>);
+	if ($num % 2 == 0) || (%rdata<ringers>.elems >= $num) {
+		%rdata<ringers>[* - 1]<num> = '\*[tenor]';
 	}
 
 	if %perf<notes>.elems {
-		%rdata<notes><footnotes> = %perf<notes>.map({ $_ ~ "\n.sp 0.25\n"}).join();
+		%rdata<notes><footnotes> = [ %perf<notes>.map({ %( 'note' => $_ ); }) ];
 	}
 
-	my $out = Template::Mustache.render($=finish, %rdata);
-	$out ~~ s:g/\n**2..*/\n/;    # clean up blank lines, which are anathema to troff
-	$out ~~ s:g/'&quot;'/"/;     # xml fixes
-	$out ~~ s:g/'&amp;'/"/;      # xml fixes
+	my $out = Template::Mustache.render($=finish, %rdata, :literal);
+	$out ~~ s:g/ \n ** 2..* /\n/;    # clean up blank lines, which are anathema to troff
+	$out .= trans([ '&lt;', '&gt;', '&amp;', '&quot;' ] => [ '<', '>', '&', '"' ]); # fix XML entities
 	return $out;
 }
 
 sub date-formatter ($self) {
 	my $year = $self.year;
-	my $month = qw|nul January February March April May June July August September October November December|[$self.month];
+	my $month = qw<nul January February March April May June July August September October November December>[$self.month];
 	my $day = $self.day;
 
 	# see https://stackoverflow.com/a/13627586/1030573
@@ -161,12 +154,12 @@ sub date-formatter ($self) {
 
 sub numbells ($method) {
 	my $class = ($method ~~ m/(\w+)$/).Str;
-	my @counts = qw|nul impossible impossible Singles Minimus Doubles Minor Triples Major Caters Royal Cinques Maximus|.map: &fc;
+	my @counts = qw<nul impossible impossible Singles Minimus Doubles Minor Triples Major Caters Royal Cinques Maximus>.map: &fc;
 	return @counts.first(fc($class), :k) // 16;
 }
 
 =finish
-{{{ commandline_comment }}}
+\# in 'root' dir: groff -Tpdf -Kutf8 groff/{{& pid}}.groff > pdf/{{& pid }}.pdf
 \# see demo.groff for comments
 \X'papersize=5.5in,8.5in'
 .pl 8.5i
@@ -189,7 +182,7 @@ sub numbells ($method) {
 .de GUILD
 .ps \\n[def_ps]pt
 .vs \\n[def_vs]pt
-.nop \f[I]by the\f[]\h[|0.5i]\f[B]\\$1\f[]
+.nop \f[I]for the\f[]\h[|0.5i]\f[B]\\$1\f[]
 ..
 .de STANZA
 .ps \\n[def_ps]pt
@@ -224,12 +217,14 @@ sub numbells ($method) {
 .ds conductor  \f[I]\s[-1](conductor)\s[+1]\f[]
 .nf
 {{# urpic}}
-\h[|3.5i]\X'pdf: pdfpic {{{img}}}.pdf -L 1i 1i'
+\h[|3.0i]\X'pdf: pdfpic {{& img }}.pdf -L 1.5i 1.5i'
 .sp 0.5v
 {{/ urpic}}
-.GUILD "{{{ guild }}}"
+{{# guild}}
+.GUILD "{{& guild }}"
+{{/ guild}}
 .STANZA "on"
-{{{ date }}}
+{{& date }}
 .STANZA "at"
 {{# tower }}
 {{# t5851 }}
@@ -241,20 +236,20 @@ Christ Church in the City of Boston
 \f[I](called \[lq]Old North\[rq])\f[]
 {{/ t5852 }}
 {{# tdef }}
-{{{ towername }}}
+{{& towername }}
 {{/ tdef }}
 {{/ tower }}
-.STANZA "was rung a {{{ performance_type }}} of"
+.STANZA "was rung a {{& performance_type }} of"
 {{# method }}
-{{{ method }}}
+{{& method }}
 {{# composed }}
 .ftsmall
-composed by {{{ composer }}}
+composed by {{& composer }}
 {{/ composed }}
 {{# details }}
 .fi
 .ftsmall
-{{{ details }}}
+{{& details }}
 .nf
 {{/ details }}
 {{/ method }}
@@ -262,13 +257,16 @@ composed by {{{ composer }}}
 .in 0
 .ta 1iR 1.2i
 {{# ringers }}
-	{{{ num }}}	{{{ ringer }}}
+	{{& num }}	{{& ringer }}
 {{/ ringers }}
 .br
 {{# notes}}
 .STANZA "with notes"
 .fi
-{{{ footnotes }}}
+{{# footnotes }}
+{{& note }}
+.sp 0.25
+{{/ footnotes }}
 .nf
 {{/ notes}}
 .finalflourish
