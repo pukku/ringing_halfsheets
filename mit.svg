@@ -28,7 +28,7 @@
 			C -100,50 -130,20 -120,30
 			C -130,20 -125,10 -120,0
 			L 0,0
-		" stroke="none" fill="#444" />
+		" stroke="none" fill="black" />
 	</g>
 	<g id="old-north" transform="matrix(1,0,0,-1,0,0) translate(0,-185) scale(0.2,0.2)" style="stroke: black; stroke-width: 1; fill: white;">
 		<!-- church building behind tower + window cutouts; note path cutout to let tower cutouts work -->
