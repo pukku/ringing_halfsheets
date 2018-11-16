@@ -3,6 +3,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"
 	id="on-logo" viewBox="-150 -50 300 300">
 	<title>MIT Guild of Bellringers</title>
+	<style type="text/css">
+		<![CDATA[
+			#text {
+				font-family: Times, "Times New Roman", serif;
+				fill: black;
+				stroke-width: 1px;
+				font-size: 16pt;
+			}
+		]]>
+	</style>
 
 	<g id="bell"  transform="matrix(1,0,0,-1,0,0) translate(0,-185)">
 		<circle cx="0" cy="80" r="100" stroke="black" fill="none" />
@@ -140,6 +150,7 @@
 	</g>
 	<g id="text">
 		<rect x="-100" y="185" width="200" height="30" stroke="none" fill="white" />
-		<text x="0" y="190" style="text-anchor: middle; dominant-baseline: hanging; font-size: 16pt;">MIT Guild of Bellringers</text>
+		<!-- <text x="0" y="190" style="text-anchor: middle; dominant-baseline: hanging; font-size: 16pt;">MIT Guild of Bellringers</text> -->
+		<text x="0" y="205" style="text-anchor: middle;">MIT Guild of Bellringers</text>
 	</g>
 </svg>
