@@ -1,7 +1,7 @@
-\# to view this: in the "root" directory: `groff -Tpdf -Kutf8 commented.groff > commented.pdf`
+\# to view this: in the "root" directory: `groff -Tpdf -Kutf8 -P-pa5 commented.groff > commented.pdf`
 \# set up the page
-\X'papersize=5.5in,8.5in'         \" pass the paper size through to the pdf driver
-.pl 8.5i                          \" tell groff about the page length
+\#\X'papersize=a5'                \" pass the paper size through to the pdf driver | doesn't really work, so commented
+.pl 8.27i                         \" tell groff about the page length
 .po 0.5i                          \" set a left margin
 .ll 4.5i                          \" the line length is page width (5.5in) - left margin - (implicit) right margin
 .sp |0.5i                         \" move down to set a top margin (we don't bother with a bottom margin)
