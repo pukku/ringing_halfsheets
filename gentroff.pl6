@@ -88,7 +88,7 @@ sub create-groff (%perf, $image) {
 	%rdata<urpic><img> = do given %perf<guild> {
 		when defined($image)            { $image  };
 		when 'North American Guild'     { 'nagcr' };
-		when 'MIT Guild of Bellringers' { 'bcr'   };
+		when 'MIT Guild of Bellringers' { 'mit'   };
 		when 'Boston Change Ringers'    { 'bcr'   };
 		default                         { 'none'  };
 	};
