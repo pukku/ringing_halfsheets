@@ -9,7 +9,8 @@ use Template::Mustache;
 sub MAIN ( Str  :p(:$performance)!,
            Bool :g(:$groff) = False,
            Bool :f(:$force) = False,
-           Str  :i(:$image)? where ( !$image.defined or ($image eq 'none') or "{$image}.pdf".IO.f or croak("{$image}.pdf does not exist for inclusion as image") )
+           Str  :i(:$image)? where ( !$image.defined or ($image eq 'none') or "{$image}.pdf".IO.f or croak("{$image}.pdf does not exist for inclusion as image") ),
+           Str  :$guild
 ) {
 
 	my $file = "groff/$performance.groff";
@@ -19,6 +20,7 @@ sub MAIN ( Str  :p(:$performance)!,
 
 	my $xml    = get-performance-xml($performance);
 	my %parsed = parse-performance-xml($xml);
+	if $guild { %parsed<guild> = $guild; }
 	my $output = create-groff(%parsed, $image);
 
 	if %parsed<pid> ne $performance {
