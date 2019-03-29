@@ -1,77 +1,9 @@
-\# to view this: in the "root" directory: `groff -Tpdf -Kutf8 -P-pa5 commented.groff > commented.pdf`
-\# set up the page
-\#\X'papersize=a5'                \" pass the paper size through to the pdf driver | doesn't really work, so commented
-.pl 8.27i                         \" tell groff about the page length
-.po 0.5i                          \" set a left margin
-.ll 4.5i                          \" the line length is page width (5.5in) - left margin - (implicit) right margin
-.sp |0.5i                         \" move down to set a top margin (we don't bother with a bottom margin)
+\# to view this: in the "root" directory: `groff -Mm -mbell -Tpdf -Kutf8 -P-pa5 commented.groff > commented.pdf`
+\# see m/bell.tmac for commented versions of the macros
+.STARTSHEET
 .
-\# make it easy to change the font size by standardizing the registers
-.nr def_ps 10                     \" default font size
-.nr def_vs 15                     \" default "leading"
-.nr sml_ps 9                      \" small font size
-.nr sml_vs 13                     \" small "leading"
-.nr flr_ps 20                     \" flourish font size
-.nr flr_vs 20                     \" flourish leading
-.
-\# set the font defaults
-.fam N                            \" make sure all fonts use the "N" family
-.ft NR                            \" New Century Schoolbook regular
-.ps \n[def_ps]pt                  \" set the font size
-.vs \n[def_vs]pt                  \" set the leading
-.lg                               \" turn on ligatures
-.kern                             \" turn on kerning
-.nh                               \" turn off hyphenation
-.
-\# define macros
-.de GUILD                         \" a macro to display the guild
-.  ps \\n[def_ps]pt               \" set font size
-.  vs \\n[def_vs]pt               \" set leading
-.  nop \f[I]for the\f[]\h[|0.5i]\f[B]\\$1\f[]        \" italic font; words "for the"; reset font; move to 0.5i from left margin; font bold; first parameter; reset font
-..
-.de STANZA                        \" a macro to start a stanza
-.  ps \\n[def_ps]pt               \" set font size
-.  vs \\n[def_vs]pt               \" set leading
-.  sp                             \" move down
-.  in 0                           \" set the indent to 0
-.  ft NI                          \" italic font
-.  nop \\$1                       \" print the first parameter
-.  br                             \" line break
-.  in 0.5i                        \" set the indent to 0.5in
-.  ft NR                          \" set the font to regular
-..
-.de ftsmall                       \" a macro to make the font smaller
-.  ps \\n[sml_ps]pt               \" set font size (using sml_ps register)
-.  vs \\n[sml_vs]pt               \" set leading
-..
-.de finalflourish                 \" make a final flourish
-.  ps \\n[flr_ps]pt               \" default font size
-.  vs \\n[flr_vs]pt               \" default leading
-.  sp                             \" move down
-.  in 0                           \" no indent
-.  ce                             \" center the next line
-.  nop \f[ZD]\m[red3]\N[167]\m[]\f[]            \" font zapf dingbats; color red3; the particular dingbat (determined by experimentation); reset color; reset font
-.  br                             \" end the line
-..
-.
-\# define some special strings
-\# for the affixes, set the font to bold, move up a bit, print the affix, move back down to the baseline, and reset the font
-.ds st         \f[B]\v[-.25v]\s[-4]st\s[+4]\v[.25v]\f[]
-.ds nd         \f[B]\v[-.25v]\s[-4]nd\s[+4]\v[.25v]\f[]
-.ds rd         \f[B]\v[-.25v]\s[-4]rd\s[+4]\v[.25v]\f[]
-.ds th         \f[B]\v[-.25v]\s[-4]th\s[+4]\v[.25v]\f[]
-\# for the treble and tenor, emulate small caps by making the font smaller and typing caps
-.ds treble     \s[-3]TREBLE\s[+3]
-.ds tenor      \s[-3]TENOR\s[+3]
-\# for the conductor, italic, slighly smaller, the text, and reset
-.ds conductor  \f[I]\s[-1](conductor)\s[+1]\f[]
-.
-\# start the page
-.nf                               \" do not fill
-.
-\# the image is optionally (but preferably) included
-\h[|3.0i]\X'pdf: pdfpic bcr.pdf -L 1.5i 1.5i'       \" move 3in in from left margin, and then the special groff way of including a pdf file (image)
-.sp 0.5v                          \" move down half a line
+\# the logo is (optionally but preferentially) placed
+.LOGO bcr.pdf
 .
 \# display the guild
 .GUILD "MIT Guild of Bellringers"
@@ -114,11 +46,11 @@ which is why '.fi' is set.
 .STANZA "with notes"
 .fi                               \" footnotes may get long, so turn on fill mode
 a footnote
-.sp 0.25
+.sp 0.5
 another footnote
-.sp 0.25
+.sp 0.5
 even more, perhaps very long, perhaps going on and on and on, etc.
-.sp 0.25
+.sp 0.5
 .nf                               \" and turn fill mode off
 .
 \# and insert the final flourish

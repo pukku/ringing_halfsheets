@@ -1,0 +1,91 @@
+\# Macros for the ringing halfsheet program
+\# include by using `-Mm -mbell` in the `groff` call (presuming these are in the `m/` directory)
+.
+\# Macros to deal with fonts
+.de setfont                     \" A macro to set the font family
+.   fam N                       \" set the default font family
+.   ft NR                       \" set the default font face
+..
+.de ftnorm                      \" set the font to a normal size
+.   setfont                     \" set the font family
+.   ps \\n[def_ps]p             \" set the font size to [def_ps] points
+.   vs \\n[def_vs]p             \" set the line spacing to [def_vs] points
+..
+.de ftsmall                     \" set the font to a smaller size
+.   setfont                     \" set the font family
+.   ps \\n[sml_ps]p             \" set the font size to [sml_ps] points
+.   vs \\n[sml_vs]p             \" set the line spacing to [sml_vs] points
+..
+.de ftflourish                  \" set the font up for the final flourish
+.   setfont                     \" set the font family
+.   ps \\n[flr_ps]p             \" set the font size to [flr_ps] points
+.   vs \\n[flr_vs]p             \" set the line spacing to [flr_vs] points
+..
+\# Macro to initialize the sheet
+\# call this at the start of the `.groff` file
+.de STARTSHEET
+.
+.   \" set page intrinsics
+.   pl 8.27i                    \" set the page length for a sheet of A5
+.   po 0.5i                     \" set the left margin
+.   ll 4.83i                    \" line length: page-width (5.83i) - left margin (0.5i) - (implicit) right margin (0.5i)
+.   sp |0.5i                    \" move down a half inch (to create a top margin; we're ignoring the bottom margin
+.
+.   \" set registers for font sizes
+.   nr def_ps 10                \" point size for default
+.   nr def_vs 15                \" line spacing for default
+.   nr sml_ps 9                 \" point size for small
+.   nr sml_vs 13                \" line spacing for small
+.   nr flr_ps 20                \" point size for flourish
+.   nr flr_vs 20                \" line spacing for flourish
+.
+.   \" set up the page environment
+.   ftnorm                      \" start with a normal font
+.   lg                          \" turn on ligatures
+.   kern                        \" turn on kerning
+.   nh                          \" turn off hyphenation
+.   nf                          \" set no-fill mode
+..
+\# Macros for various sections
+.de LOGO                        \" a macro to insert the logo
+.   ftnorm                      \" reset the font
+.   nop \h[|3.0i]\X'pdf: pdfpic \\$1 -L 1.5i 1.5i'       \" move 3in in from left margin, and then the special groff way of including a pdf file (image)
+.   sp 0.5v                     \" move down half a line
+.   ftnorm                      \" reset the font
+..
+.de GUILD                       \" a macro to display the guild
+.   ftnorm                      \" choose the normal font
+.   nop \f[I]for the\f[]\h[|0.5i]\f[B]\\$1\f[]        \" italic font; words "for the"; reset font; move to 0.5i from left margin; font bold; first parameter; reset font
+.   ftnorm                      \" reset the font
+..
+.de STANZA                      \" a macro to start a stanza
+.   ftnorm                      \" the normal font
+.   sp                          \" move down
+.   in 0                        \" set the indent to 0
+.   ft NI                       \" italic font
+.   nop \\$1                    \" print the first parameter
+.   br                          \" line break
+.   in 0.5i                     \" indent should be 0.5in
+.   ftnorm                      \" back to the normal font
+..
+.de finalflourish               \" macro to display the final flourish in red
+.   ftflourish                  \" set up the flourish font
+.   sp                          \" move down
+.   in 0                        \" set the indent to 0, so centering works correctly
+.   ce                          \" center the next line of text
+.   nop \f[ZD]\m[red3]\N[167]\m[]\f[]            \" font zapf dingbats; color red3; the particular dingbat (determined by experimentation); reset color; reset font
+.   br                          \" end the line
+.   ftnorm                      \" reset the font
+..
+.
+\# define some special strings
+\# for the affixes, set the font to bold, move up a bit, print the affix, move back down to the baseline, and reset the font
+.ds st         \f[B]\v[-.25v]\s[-4]st\s[+4]\v[.25v]\f[]
+.ds nd         \f[B]\v[-.25v]\s[-4]nd\s[+4]\v[.25v]\f[]
+.ds rd         \f[B]\v[-.25v]\s[-4]rd\s[+4]\v[.25v]\f[]
+.ds th         \f[B]\v[-.25v]\s[-4]th\s[+4]\v[.25v]\f[]
+\# for the treble and tenor, emulate small caps by making the font smaller and typing caps
+.ds treble     \s[-3]TREBLE\s[+3]
+.ds tenor      \s[-3]TENOR\s[+3]
+\# for the conductor, italic, slighly smaller, the text, and reset
+.ds conductor  \f[I]\s[-1](conductor)\s[+1]\f[]

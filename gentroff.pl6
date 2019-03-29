@@ -161,64 +161,10 @@ sub numbells ($method) {
 }
 
 =finish
-\# in 'root' dir: groff -Tpdf -Kutf8 -P-pa5 groff/{{& pid}}.groff > pdf/{{& pid }}.pdf
-.pl 8.27i
-.po 0.5i
-.ll 4.5i
-.sp |0.5i
-.nr def_ps 10
-.nr def_vs 15
-.nr sml_ps 9
-.nr sml_vs 13
-.nr flr_ps 20
-.nr flr_vs 20
-.fam N
-.ft NR
-.ps \n[def_ps]pt
-.vs \n[def_vs]pt
-.lg
-.kern
-.nh
-.de GUILD
-.ps \\n[def_ps]pt
-.vs \\n[def_vs]pt
-.nop \f[I]for the\f[]\h[|0.5i]\f[B]\\$1\f[]
-..
-.de STANZA
-.ps \\n[def_ps]pt
-.vs \\n[def_vs]pt
-.sp
-.in 0
-.ft NI
-.nop \\$1
-.br
-.in 0.5i
-.ft NR
-..
-.de ftsmall
-.ps \\n[sml_ps]pt
-.vs \\n[sml_vs]pt
-..
-.de finalflourish
-.ps \\n[flr_ps]pt
-.vs \\n[flr_vs]pt
-.sp
-.in 0
-.ce
-.nop \f[ZD]\m[red3]\N[167]\m[]\f[]
-.br
-..
-.ds st         \f[B]\v[-.25v]\s[-4]st\s[+4]\v[.25v]\f[]
-.ds nd         \f[B]\v[-.25v]\s[-4]nd\s[+4]\v[.25v]\f[]
-.ds rd         \f[B]\v[-.25v]\s[-4]rd\s[+4]\v[.25v]\f[]
-.ds th         \f[B]\v[-.25v]\s[-4]th\s[+4]\v[.25v]\f[]
-.ds treble     \s[-3]TREBLE\s[+3]
-.ds tenor      \s[-3]TENOR\s[+3]
-.ds conductor  \f[I]\s[-1](conductor)\s[+1]\f[]
-.nf
+\# in 'root' dir: groff -Mm -mbell -Tpdf -Kutf8 -P-pa5 groff/{{& pid}}.groff > pdf/{{& pid }}.pdf
+.STARTSHEET
 {{# urpic}}
-\h[|3.0i]\X'pdf: pdfpic {{& img }}.pdf -L 1.5i 1.5i'
-.sp 0.5v
+.LOGO {{& img }}.pdf
 {{/ urpic}}
 {{# guild}}
 .GUILD "{{& guild }}"
@@ -265,7 +211,7 @@ composed by {{& composer }}
 .fi
 {{# footnotes }}
 {{& note }}
-.sp 0.25
+.sp 0.5
 {{/ footnotes }}
 .nf
 {{/ notes}}
