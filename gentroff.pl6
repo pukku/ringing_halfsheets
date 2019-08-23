@@ -32,7 +32,7 @@ sub MAIN ( Str  :p(:$performance)!,
 	say "$file written.";
 
 	if $groff {
-		shell "/usr/local/bin/groff -Tpdf -Kutf8 -P-pa5 $file > pdf/$performance.pdf";
+		shell "/usr/local/bin/groff -Mm -mbell -Tpdf -Kutf8 -P-pa5 $file > pdf/$performance.pdf";
 		say "groff command run.";
 	}
 }
